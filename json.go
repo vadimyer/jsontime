@@ -38,6 +38,8 @@ func (extension *CustomTimeExtension) UpdateStructDescriptor(structDescriptor *j
 			timeFormat = "2006-01-02 15:04:05"
 		} else if timeFormat == "sql_date" {
 			timeFormat = "2006-01-02"
+		} else if timeFormat == "sql_timestamp" {
+			timeFormat = "2006-01-02T15:04:05.999999"
 		}
 
 		locale := time.Local
@@ -55,7 +57,7 @@ func (extension *CustomTimeExtension) UpdateStructDescriptor(structDescriptor *j
 
 		var isSnap bool
 		snapTag := binding.Field.Tag().Get("time_snap")
-		if snapTag == "" && (formatTag == "sql_datetime" || formatTag == "sql_date") {
+		if snapTag == "" && (formatTag == "sql_datetime" || formatTag == "sql_date" || formatTag == "sql_timestamp") {
 			isSnap = true
 		} else {
 			isSnap, _ = strconv.ParseBool(binding.Field.Tag().Get("time_snap"))
@@ -87,7 +89,7 @@ func (extension *CustomTimeExtension) UpdateStructDescriptor(structDescriptor *j
 				str := lt.Format(format)
 				if formatTag == "sql_date" && (str == "0000-01-01" || (isSnap && lt.Unix() <= 0)) {
 					str = "0000-00-00"
-				} else if formatTag == "sql_datetime" && (str == "0000-01-01 00:00:00" || (isSnap && lt.Unix() <= 0)) {
+				} else if (formatTag == "sql_datetime" || formatTag == "sql_timestamp") && (str == "0000-01-01 00:00:00" || (isSnap && lt.Unix() <= 0)) {
 					str = "0000-00-00 00:00:00"
 				}
 				stream.WriteString(str)
